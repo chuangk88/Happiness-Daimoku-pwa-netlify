@@ -1,10 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbxr9FeErRKje2Xci4ZbCD6fS8nSbgAEh3vFXnXfoCic5oVganE9Q-Uq3-9VQCfJj38_XQ/exec" />
-  <title>Redirecting to Happiness Daimoku Tracker...</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happiness Daimoku</title>
+  <link rel="manifest" href="manifest.json" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <p>If you’re not redirected, <a href="https://script.google.com/macros/s/AKfycbxr9FeErRKje2Xci4ZbCD6fS8nSbgAEh3vFXnXfoCic5oVganE9Q-Uq3-9VQCfJj38_XQ/exec">click here</a>.</p>
+  <main>
+    <h1>💛 Happiness Daimoku</h1>
+    <input type="number" id="minutes" placeholder="Enter minutes" />
+    <button id="submit">Submit</button>
+    <div id="output">Total Minutes: —<br>Daimoku Count: —</div>
+    <canvas id="confetti-canvas"></canvas>
+  </main>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxr9FeErRKje2Xci4ZbCD6fS8nSbgAEh3vFXnXfoCic5oVganE9Q-Uq3-9VQCfJj38_XQ/exec";
+
+    document.getElementById("submit").addEventListener("click", async () => {
+      const minutes = Number(document.getElementById("minutes").value);
+      if (!minutes || minutes <= 0) return alert("Please enter valid minutes");
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ minutes }),
+          headers: { "Content-Type": "application/json" }
+        });
+
+        const result = await response.json();
+        document.getElementById("output").innerHTML =
+          `Total Minutes: ${result.totalMinutes}<br>Daimoku Count: ${result.daimokuCount}`;
+
+        if (result.totalMinutes % 1000 === 0) {
+          launchConfetti();
+        }
+      } catch (err) {
+        document.getElementById("output").innerText = "Error submitting 🙁";
+        console.error(err);
+      }
+    });
+
+    function launchConfetti() {
+      const duration = 3 * 1000;
+      const end = Date.now() + duration;
+      const colors = ["#bb0000", "#ffffff", "#ffd700"];
+
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors
+        });
+
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    // Register service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: #fffbe6;
+      color: #333;
+      height: 100%;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    input, button {
+      font-size: 1.2rem;
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #ffd700;
+      border: none;
+      cursor: pointer;
+    }
+
+    #output {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+  </style>
 </body>
 </html>

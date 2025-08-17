@@ -1,10 +1,10 @@
 {
   "name": "Happiness Daimoku",
   "short_name": "Daimoku",
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffcc00",
+  "background_color": "#fffbe6",
+  "theme_color": "#ffd700",
   "icons": [
     {
       "src": "icon-192.png",

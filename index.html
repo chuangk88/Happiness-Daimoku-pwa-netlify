@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happiness Daimoku</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffcc00" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2em;
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #ffd6d6, #fff7c2, #d6f0ff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    h1 {
+      color: #ff9800;
+      margin-bottom: 0.3em;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 1em;
+      font-size: 1.1em;
+    }
+
+    input[type="number"],
+button {
+  font-size: 1.5em;
+  padding: 0.6em;
+  width: 80%;
+  max-width: 300px;
+  margin: 0.5em 0;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+input[type="number"] {
+  border: 2px solid #ccc;
+}
+
+button {
+  background-color: #ffcc00;
+  border: none;
+  cursor: pointer;
+}
+
+    h2, h3 {
+      font-size: 1.5em;
+      margin: 0.5em 0;
+    }
+
+    .progress {
+      width: 80%;
+      max-width: 300px;
+      background: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1em 0;
+    }
+
+    .progress-bar {
+      height: 20px;
+      background: #4caf50;
+      width: 0%;
+      transition: width 0.5s;
+    }
+  </style>
+</head>
+<body>
+  <h1>Happiness Daimoku</h1>
+  <p>Chant earnestly for the good health and happiness of all</p>
+
+  <input type="number" id="minutesInput" placeholder="Minutes chanted" />
+  <button onclick="addMinutes()">Add Minutes Chanted</button>
+
+  <h2>Total Chanted: <span id="totalDisplay">0h 0m</span></h2>
+  <h3>Million Daimoku: <span id="daimokuDisplay">0</span></h3>
+
+  <div class="progress">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxr9FeErRKje2Xci4ZbCD6fS8nSbgAEh3vFXnXfoCic5oVganE9Q-Uq3-9VQCfJj38_XQ/exec";
+    let previousDaimoku = 0;
+
+    async function fetchData() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      updateDisplay(data.totalMinutes, data.daimokuCount);
+    }
+
+    async function addMinutes() {
+      const minutes = Number(document.getElementById("minutesInput").value);
+      if (!minutes || minutes <= 0) return alert("Enter valid minutes");
+
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ minutes })
+      });
+      const data = await res.json();
+      updateDisplay(data.totalMinutes, data.daimokuCount);
+      document.getElementById("minutesInput").value = "";
+    }
+
+    function updateDisplay(totalMinutes, daimokuCount) {
+      const hours = Math.floor(totalMinutes / 60);
+      const mins = totalMinutes % 60;
+      document.getElementById("totalDisplay").textContent = `${hours}h ${mins}m`;
+      document.getElementById("daimokuDisplay").textContent = daimokuCount;
+
+      const percent = Math.min((totalMinutes / 20000) * 100, 100);
+      document.getElementById("progressBar").style.width = percent + "%";
+
+      if (daimokuCount > previousDaimoku) {
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+
+      previousDaimoku = daimokuCount;
+    }
+
+    fetchData();
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+</body>
+</html>

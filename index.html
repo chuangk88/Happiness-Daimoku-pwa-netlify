@@ -99,19 +99,27 @@ button {
       updateDisplay(data.totalMinutes, data.daimokuCount);
     }
 
-    async function addMinutes() {
-      const minutes = Number(document.getElementById("minutesInput").value);
-      if (!minutes || minutes <= 0) return alert("Enter valid minutes");
+   async function addMinutes() {
+  const minutes = Number(document.getElementById("minutesInput").value);
+  if (!minutes || minutes <= 0) return alert("Enter valid minutes");
 
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ minutes })
-      });
-      const data = await res.json();
-      updateDisplay(data.totalMinutes, data.daimokuCount);
-      document.getElementById("minutesInput").value = "";
-    }
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ minutes })
+    });
+
+    if (!res.ok) throw new Error("Network response was not ok");
+
+    const data = await res.json();
+    updateDisplay(data.totalMinutes, data.daimokuCount);
+    document.getElementById("minutesInput").value = "";
+  } catch (err) {
+    alert("Something went wrong. Please try again.");
+    console.error("POST error:", err);
+  }
+}
 
     function updateDisplay(totalMinutes, daimokuCount) {
       const hours = Math.floor(totalMinutes / 60);
@@ -142,4 +150,5 @@ button {
     }
   </script>
 </body>
+
 </html>
